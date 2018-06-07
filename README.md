@@ -1,6 +1,6 @@
-# NESTer
+# NESTerm
 
-NESTer is a NES emulator targeted to run on terminals.
+NESTerm is a NES emulator targeted to run on terminals.
 
 ## Logs
 

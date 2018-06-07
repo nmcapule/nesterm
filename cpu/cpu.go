@@ -21,6 +21,47 @@ const (
 	ZEROY                 // Zero Page,Y
 )
 
+var cycles = []uint8{
+	//01 02 03 04 05 06 07
+	//09 0a 0b 0c 0d 0e 0f
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x00
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x08
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x10
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x18
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x20
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x28
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x30
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x38
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x40
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x48
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x50
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x58
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x60
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x68
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x70
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x78
+	//01 02 03 04 05 06 07
+	//09 0a 0b 0c 0d 0e 0f
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x80
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x88
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x90
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x98
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xa0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xa8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xb0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xb8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xc0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xc8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xd0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xd8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xe0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xe8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xf0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xf8
+	//01 02 03 04 05 06 07
+	//09 0a 0b 0c 0d 0e 0f
+}
+
 var modetable = []addrMode{
 	//00   0x01   0x02   0x03   0x04   0x05   0x06   0x07
 	//08   0x09   0x0a   0x0b   0x0c   0x0d   0x0e   0x0f
@@ -102,6 +143,76 @@ var optable = []string{
 	"SED", "SBC", "___", "___", "___", "SBC", "INC", "___", // 0xf8
 	//00   0x01   0x02   0x03   0x04   0x05   0x06   0x07
 	//08   0x09   0x0a   0x0b   0x0c   0x0d   0x0e   0x0f
+}
+
+// Memory is an implementation of the 6502 addressable memory.
+//
+// Memory Map:
+//  0x0000..0x00FF    - Zero Page
+//    0x0000..0x1FFF  - Mirror (See Set 1)
+//  0x2000..0x401F    - IO Register
+//    0x2000..0x3FFF  - Mirror (See Set 2)
+//  0x4020..0x5FFF    - Expansion ROM
+//  0x6000..0x7FFF    - SRAM
+//  0x8000..0xFFFF    - PRG ROM
+//    0x8000..0xBFFF  - 16K Memory Bank 1
+//    0xC000..0xFFFF  - 16K Memory Bank 2; Mirrors Bank 1 depending on cartridge (See Set 3)
+//
+// Mirrors
+//  Set 1) 0x0800 increments
+//    0x0000..0x07FF
+//    0x0800..0x0FFF
+//    0x1000..0x17FF
+//    0x1800..0x1FFF
+//  Set 2) 0x0008 increments
+//    0x2000..0x2007
+//    0x2008..0x200F
+//    0x2010..0x2017
+//    0x2018..0x201F
+//    ...
+//    0x3FF7..0x3FFF
+//  Set 3) 0x4000 increments (optional)
+//    0x8000..0xBFFF
+//    0xC000..0xFFFF
+type Memory struct {
+	m         [0xFFFF]uint8
+	mirrorPRG bool // Set if want to mirror PRG 1 and PRG 2
+}
+
+// Computes the effective address of the given absolute address.
+func (m *Memory) faddr(addr uint16) uint16 {
+	if addr >= 0x0000 && addr <= 0x1FFF {
+		return (addr & 0x0800)
+	}
+	if addr >= 0x2000 && addr <= 0x3FFF {
+		return (addr & 0x0008) + 0x2000
+	}
+	if addr >= 0x8000 && addr <= 0xFFFF && m.mirrorPRG {
+		return (addr & 0x4000) + 0x8000
+	}
+	return addr
+}
+
+// Dump returns a whole copy of the virtual memory.
+func (m *Memory) Dump() [0xFFFF]uint8 {
+	var vm [0xFFFF]uint8
+	for i := 0; i <= 0xFFFF; i++ {
+		vm[i] = m.Get(i)
+	}
+	return vm
+}
+
+// Set sets the byte on the given memory address.
+// Returns true if page boundary crossed.
+func (m *Memory) Set(addr uint16, v uint8) bool {
+	m.m[m.faddr(addr)] = v
+	return false
+}
+
+// Get gets the byte on the given memory address.
+// The last return value is if page boundary crossed.
+func (m *Memory) Get(addr uint16) (uint8, bool) {
+	return m.m[m.faddr(addr)], false
 }
 
 // Cpu is an implementation of the 6502 microprocessor.
