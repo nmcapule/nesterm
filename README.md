@@ -45,3 +45,13 @@ Now I  can finally somewhat understand this document! Now onto some coding...
 - Awesome op code reference at [this link](http://www.emulator101.com/reference/6502-reference.html)
 - First check-in of Go code
 - Lots of manual work and cross-referencing! Darn...
+
+### Day 3
+
+- Read up on 6502 (2A03) memory mapping
+- Implementing cpu.Memory struct!
+
+> TODO:
+>   - Implement CPU Op Codes
+>   - That's a lot of Op Codes. Better get movin.
+
