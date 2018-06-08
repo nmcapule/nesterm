@@ -25,7 +25,7 @@ const (
 	ZEROY                 // Zero Page,Y
 )
 
-// TODO(ncapule): These aren't really accurate.
+// TODO(nmcapule): These aren't really accurate.
 var cycles = []uint8{
 	//01 02 03 04 05 06 07
 	//09 0a 0b 0c 0d 0e 0f
@@ -221,6 +221,7 @@ func (m *Memory) Get(addr uint16) (uint8, bool) {
 }
 
 // Processor status flags.
+// http://nesdev.com/6502.txt
 const (
 	FLAG_CARRY       uint8 = 0x01
 	FLAG_ZERO              = 0x02
@@ -229,7 +230,7 @@ const (
 	FLAG_BREAK             = 0x10
 	FLAG_UNUSED            = 0x20
 	FLAG_OVERFLOW          = 0x40
-	FLAG_NEGATIVE          = 0x80
+	FLAG_SIGN              = 0x80 // aka. Negative Flag
 )
 
 // Cpu is an implementation of the 6502 microprocessor.
@@ -257,13 +258,13 @@ func (c Cpu) String() string {
     Break             = %t
     (unused)          = %t
     Overflow          = %t
-    Negative          = %t
-  `
+    Negative          = %t`
+
 	return fmt.Sprintf(s, c.pc, c.sp, c.a, c.x, c.y,
 		c.isflag(FLAG_CARRY), c.isflag(FLAG_ZERO),
 		c.isflag(FLAG_NOINTERRUPT), c.isflag(FLAG_DECIMAL),
 		c.isflag(FLAG_BREAK), c.isflag(FLAG_UNUSED),
-		c.isflag(FLAG_OVERFLOW), c.isflag(FLAG_NEGATIVE))
+		c.isflag(FLAG_OVERFLOW), c.isflag(FLAG_SIGN))
 }
 
 // Returns true if processor status flag is set.
@@ -281,6 +282,61 @@ func (c *Cpu) unflag(flag uint8) {
 	c.p &= ^flag
 }
 
-func (c *Cpu) adc(addr uint16) {
+// Assign value to processor status flag.
+func (c *Cpu) setflag(flag uint8, v bool) {
+	if v {
+		c.flag(flag)
+	} else {
+		c.unflag(flag)
+	}
+}
 
+func (c *Cpu) calcflags(result int16, mask uint8) {
+	// TODO(nmcapule): Im not sure about this one though.
+	if mask&FLAG_CARRY != 0 {
+		c.setflag(FLAG_CARRY, result&0xF00 != 0)
+	}
+	if mask&FLAG_ZERO != 0 {
+		c.setflag(FLAG_ZERO, result == 0)
+	}
+	// TODO(nmcapule): Im not sure about this one though.
+	if mask&FLAG_OVERFLOW != 0 {
+		c.setflag(FLAG_ZERO, result > 0x0FF)
+	}
+	// Sign bit is just the most significant bit in a byte.
+	if mask&FLAG_SIGN != 0 {
+		c.setflag(FLAG_SIGN, result&0x80 != 0)
+	}
+}
+
+func (c *Cpu) adc(x uint8) int16 {
+	// TODO(nmcapule)
+
+	c.calcflags(int16(c.a), FLAG_SIGN|FLAG_ZERO|FLAG_CARRY|FLAG_OVERFLOW)
+
+	return int16(0)
+}
+
+func (c *Cpu) and(x uint8) int16 {
+	c.a &= x
+
+	c.calcflags(int16(c.a), FLAG_SIGN|FLAG_ZERO)
+
+	return int16(c.a)
+}
+
+func (c *Cpu) clc() {
+	c.unflag(FLAG_CARRY)
+}
+
+func (c *Cpu) cld() {
+	c.unflag(FLAG_DECIMAL)
+}
+
+func (c *Cpu) cli() {
+	c.unflag(FLAG_NOINTERRUPT)
+}
+
+func (c *Cpu) clv() {
+	c.unflag(FLAG_OVERFLOW)
 }

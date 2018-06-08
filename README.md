@@ -63,3 +63,17 @@ Now I  can finally somewhat understand this document! Now onto some coding...
 > NOTE: WTF is the "S" flag?
 >   S flag here: http://www.6502.org/tutorials/6502opcodes.html
 >   No S flag here: http://nesdev.com/NESDoc.pdf
+
+- **More 6502 Reference**
+
+    [Link](http://nesdev.com/6502.txt)
+
+    Helped finally know that the S flag is the Sign flag, aka., Negative Flag
+
+- Having problems with the sign flag. Why the f does the AND op code has a sign flag change?
+
+> TIL: Sign flag always corresponds to the most-significant bit
+
+- Now having problems differentiating between the carry and the overflow flag.
+
+- My actually first Op code (CLV) - Clear Overflow Flag
