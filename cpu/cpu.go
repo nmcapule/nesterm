@@ -1,6 +1,10 @@
 // Package cpu implements the 6502 microprocessor.
 package cpu
 
+import (
+	"fmt"
+)
+
 type addrMode int8
 
 // 6502 Addressing Modes.
@@ -21,6 +25,7 @@ const (
 	ZEROY                 // Zero Page,Y
 )
 
+// TODO(ncapule): These aren't really accurate.
 var cycles = []uint8{
 	//01 02 03 04 05 06 07
 	//09 0a 0b 0c 0d 0e 0f
@@ -197,7 +202,7 @@ func (m *Memory) faddr(addr uint16) uint16 {
 func (m *Memory) Dump() [0xFFFF]uint8 {
 	var vm [0xFFFF]uint8
 	for i := 0; i <= 0xFFFF; i++ {
-		vm[i] = m.Get(i)
+		vm[i], _ = m.Get(uint16(i))
 	}
 	return vm
 }
@@ -215,10 +220,67 @@ func (m *Memory) Get(addr uint16) (uint8, bool) {
 	return m.m[m.faddr(addr)], false
 }
 
+// Processor status flags.
+const (
+	FLAG_CARRY       uint8 = 0x01
+	FLAG_ZERO              = 0x02
+	FLAG_NOINTERRUPT       = 0x04
+	FLAG_DECIMAL           = 0x08
+	FLAG_BREAK             = 0x10
+	FLAG_UNUSED            = 0x20
+	FLAG_OVERFLOW          = 0x40
+	FLAG_NEGATIVE          = 0x80
+)
+
 // Cpu is an implementation of the 6502 microprocessor.
 type Cpu struct {
-	memory     [0xFFFF]uint8 // Addressable memory in 6502
-	pc         uint16        // Program Counter
-	sp         uint8         // Stack Pointer
-	a, x, y, p uint8         // Accumulator; X, Y Register; Processor Status
+	memory     Memory // Addressable memory in 6502
+	pc         uint16 // Program Counter
+	sp         uint8  // Stack Pointer
+	a, x, y, p uint8  // Accumulator; X, Y Register; Processor Status
+}
+
+// String implements the Stringer interface.
+func (c Cpu) String() string {
+	s := `6502 (2A03)
+  Program Counter: %x
+  Stack Pointer:   %x
+  Registers:
+    A = %x
+    X = %x
+    Y = %x
+  Status Flags:
+    Carry             = %t
+    Zero              = %t
+    Interrupt Disable = %t
+    Decimal Mode      = %t
+    Break             = %t
+    (unused)          = %t
+    Overflow          = %t
+    Negative          = %t
+  `
+	return fmt.Sprintf(s, c.pc, c.sp, c.a, c.x, c.y,
+		c.isflag(FLAG_CARRY), c.isflag(FLAG_ZERO),
+		c.isflag(FLAG_NOINTERRUPT), c.isflag(FLAG_DECIMAL),
+		c.isflag(FLAG_BREAK), c.isflag(FLAG_UNUSED),
+		c.isflag(FLAG_OVERFLOW), c.isflag(FLAG_NEGATIVE))
+}
+
+// Returns true if processor status flag is set.
+func (c *Cpu) isflag(flag uint8) bool {
+	return c.p&flag != 0
+}
+
+// Set processor status flag.
+func (c *Cpu) flag(flag uint8) {
+	c.p |= flag
+}
+
+// Clear processor status flag.
+func (c *Cpu) unflag(flag uint8) {
+	c.p &= ^flag
+}
+
+func (c *Cpu) adc(addr uint16) {
+
 }

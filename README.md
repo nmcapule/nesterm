@@ -55,3 +55,11 @@ Now I  can finally somewhat understand this document! Now onto some coding...
 >   - Implement CPU Op Codes
 >   - That's a lot of Op Codes. Better get movin.
 
+### Day 4
+
+- Encoding processor status
+- My first Op code (ADC)
+
+> NOTE: WTF is the "S" flag?
+>   S flag here: http://www.6502.org/tutorials/6502opcodes.html
+>   No S flag here: http://nesdev.com/NESDoc.pdf
