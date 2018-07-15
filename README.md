@@ -77,3 +77,7 @@ Now I  can finally somewhat understand this document! Now onto some coding...
 - Now having problems differentiating between the carry and the overflow flag.
 
 - My actually first Op code (CLV) - Clear Overflow Flag
+
+### Day 5
+
+- Implement addressing mode!

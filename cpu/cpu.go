@@ -25,46 +25,10 @@ const (
 	ZEROY                 // Zero Page,Y
 )
 
-// TODO(nmcapule): These aren't really accurate.
-var cycles = []uint8{
-	//01 02 03 04 05 06 07
-	//09 0a 0b 0c 0d 0e 0f
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x00
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x08
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x10
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x18
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x20
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x28
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x30
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x38
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x40
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x48
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x50
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x58
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x60
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x68
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x70
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x78
-	//01 02 03 04 05 06 07
-	//09 0a 0b 0c 0d 0e 0f
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x80
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x88
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x90
-	2, 2, 2, 2, 2, 2, 2, 2, // 0x98
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xa0
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xa8
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xb0
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xb8
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xc0
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xc8
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xd0
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xd8
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xe0
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xe8
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xf0
-	2, 2, 2, 2, 2, 2, 2, 2, // 0xf8
-	//01 02 03 04 05 06 07
-	//09 0a 0b 0c 0d 0e 0f
+var modesize = []uint16{
+	1,
+	3,
+	// More
 }
 
 var modetable = []addrMode{
@@ -106,6 +70,48 @@ var modetable = []addrMode{
 	IMPLY, ABSOY, PLACE, PLACE, PLACE, ABSOX, ABSOX, PLACE, // 0xf8
 	//00   0x01   0x02   0x03   0x04   0x05   0x06   0x07
 	//08   0x09   0x0a   0x0b   0x0c   0x0d   0x0e   0x0f
+}
+
+// TODO(nmcapule): These aren't really accurate.
+var cycles = []uint8{
+	//01 02 03 04 05 06 07
+	//09 0a 0b 0c 0d 0e 0f
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x00
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x08
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x10
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x18
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x20
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x28
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x30
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x38
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x40
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x48
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x50
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x58
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x60
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x68
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x70
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x78
+	//01 02 03 04 05 06 07
+	//09 0a 0b 0c 0d 0e 0f
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x80
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x88
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x90
+	2, 2, 2, 2, 2, 2, 2, 2, // 0x98
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xa0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xa8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xb0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xb8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xc0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xc8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xd0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xd8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xe0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xe8
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xf0
+	2, 2, 2, 2, 2, 2, 2, 2, // 0xf8
+	//01 02 03 04 05 06 07
+	//09 0a 0b 0c 0d 0e 0f
 }
 
 // http://www.emulator101.com/reference/6502-reference.html
@@ -202,7 +208,7 @@ func (m *Memory) faddr(addr uint16) uint16 {
 func (m *Memory) Dump() [0xFFFF]uint8 {
 	var vm [0xFFFF]uint8
 	for i := 0; i <= 0xFFFF; i++ {
-		vm[i], _ = m.Get(uint16(i))
+		vm[i] = m.Get(uint16(i))
 	}
 	return vm
 }
@@ -215,9 +221,15 @@ func (m *Memory) Set(addr uint16, v uint8) bool {
 }
 
 // Get gets the byte on the given memory address.
-// The last return value is if page boundary crossed.
-func (m *Memory) Get(addr uint16) (uint8, bool) {
-	return m.m[m.faddr(addr)], false
+func (m *Memory) Get(addr uint16) uint8 {
+	return m.m[m.faddr(addr)]
+}
+
+// Get16 gets a 16bit from the given memory address.
+func (m *Memory) Get16(addr uint16) uint16 {
+	hi := uint16(m.Get(addr + 1))
+	lo := uint16(m.Get(addr))
+	return hi<<8 | lo
 }
 
 // Processor status flags.
@@ -267,6 +279,22 @@ func (c Cpu) String() string {
 		c.isflag(FLAG_OVERFLOW), c.isflag(FLAG_SIGN))
 }
 
+// Step executes a single cycle of the CPU.
+func (c *Cpu) Step() {
+	op := c.memory.Get(c.pc)
+	addr := c.pc + 1
+	mode := modetable[op]
+	c.pc += modesize[mode]
+
+	addr, pbc := c.calcaddr(addr, mode)
+	if pbc {
+		fmt.Println("Page boundary crossed")
+	}
+
+	// TODO(nmcapule): Write me
+	fmt.Println(addr)
+}
+
 // Returns true if processor status flag is set.
 func (c *Cpu) isflag(flag uint8) bool {
 	return c.p&flag != 0
@@ -309,6 +337,53 @@ func (c *Cpu) calcflags(result int16, mask uint8) {
 	}
 }
 
+// Calculates the address to be used by the op. It is assumed that the program
+// counter has already moved before this method is called.
+//
+// Returns the address and whether addressing mode caused a page boundary crossing.
+func (c *Cpu) calcaddr(addr uint16, mode addrMode) (uint16, bool) {
+	switch mode {
+	case ABSOL: // Absolute
+		return c.memory.Get16(addr), false
+	case ABSOX: // Absolute + X
+		base := c.memory.Get16(addr)
+		addr = base + uint16(c.x)
+		return addr, crossPage(addr, base)
+	case ABSOY: // Absolute + Y
+		base := c.memory.Get16(addr)
+		addr = base + uint16(c.y)
+		return addr, crossPage(addr, base)
+	case IMMED: // Immediate
+		return addr, false
+	case IDREC:
+		return c.memory.Get16(uint16(c.memory.Get(addr))), false
+	case IDXDI: // Indexed Indirect
+		// TODO(ncapule): Check out fogleman/nes bug
+		return c.memory.Get16(uint16(c.memory.Get(addr) + c.x)), false
+	case IDIDX: // Indirect Indexed
+		// TODO(ncapule): Check out fogleman/nes bug
+		base := c.memory.Get16(uint16(c.memory.Get(addr)))
+		addr = base + uint16(c.y)
+		return addr, crossPage(addr, base)
+	case RELAT: // Relative
+		offset := uint16(c.memory.Get(addr))
+		// TODO(ncapule): Why?
+		if offset >= 0x80 {
+			return c.pc + offset - 0x100, false
+		}
+		return c.pc + offset, false
+	case ZEROP: // Zero Page
+		return uint16(c.memory.Get(addr)), false
+	case ZEROX: // Zero Page + X
+		return uint16(c.memory.Get(addr) + c.x), false
+	case ZEROY: // Zero Page + Y
+		return uint16(c.memory.Get(addr) + c.y), false
+	default:
+		// ACCUM, IMPLY
+		return 0, false
+	}
+}
+
 func (c *Cpu) adc(x uint8) int16 {
 	// TODO(nmcapule)
 
@@ -339,4 +414,9 @@ func (c *Cpu) cli() {
 
 func (c *Cpu) clv() {
 	c.unflag(FLAG_OVERFLOW)
+}
+
+// Checks if addr a and b differ pages (page is per 256 bytes).
+func crossPage(a, b uint16) bool {
+	return a&0xFF00 != b&0xFF00
 }
