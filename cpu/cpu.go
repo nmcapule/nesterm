@@ -26,8 +26,20 @@ const (
 )
 
 var modesize = []uint16{
-	1,
-	3,
+	1, // PLACE
+	3, // ABSOL
+	3, // ABSOX
+	3, // ABSOY
+	1, // ACCUM
+	2, // IDIDX
+	3, // IDREC
+	2, // IDXDI
+	3, // IMMED
+	1, // IMPLY
+	2, // RELAT
+	2, // ZEROP
+	2, // ZEROX
+	2, // ZEROY
 	// More
 }
 
@@ -284,6 +296,8 @@ func (c *Cpu) Step() {
 	op := c.memory.Get(c.pc)
 	addr := c.pc + 1
 	mode := modetable[op]
+
+	// Move counter at the end of instruction and args
 	c.pc += modesize[mode]
 
 	addr, pbc := c.calcaddr(addr, mode)
@@ -356,7 +370,7 @@ func (c *Cpu) calcaddr(addr uint16, mode addrMode) (uint16, bool) {
 	case IMMED: // Immediate
 		return addr, false
 	case IDREC:
-		return c.memory.Get16(uint16(c.memory.Get(addr))), false
+		return c.memory.Get16(c.memory.Get16(addr)), false
 	case IDXDI: // Indexed Indirect
 		// TODO(ncapule): Check out fogleman/nes bug
 		return c.memory.Get16(uint16(c.memory.Get(addr) + c.x)), false
