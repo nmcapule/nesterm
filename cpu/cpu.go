@@ -247,18 +247,18 @@ func (m *Memory) Get16(addr uint16) uint16 {
 // Processor status flags.
 // http://nesdev.com/6502.txt
 const (
-	FLAG_CARRY       uint8 = 0x01
-	FLAG_ZERO              = 0x02
-	FLAG_NOINTERRUPT       = 0x04
-	FLAG_DECIMAL           = 0x08
-	FLAG_BREAK             = 0x10
-	FLAG_UNUSED            = 0x20
-	FLAG_OVERFLOW          = 0x40
-	FLAG_SIGN              = 0x80 // aka. Negative Flag
+	FlagCarry       uint8 = 0x01
+	FlagZero              = 0x02
+	FlagNoInterrupt       = 0x04
+	FlagDecimal           = 0x08
+	FlagBreak             = 0x10
+	FlagUnused            = 0x20
+	FlagOverflow          = 0x40
+	FlagSign              = 0x80 // aka. Negative Flag
 )
 
-// Cpu is an implementation of the 6502 microprocessor.
-type Cpu struct {
+// CPU is an implementation of the 6502 microprocessor.
+type CPU struct {
 	memory     Memory // Addressable memory in 6502
 	pc         uint16 // Program Counter
 	sp         uint8  // Stack Pointer
@@ -266,7 +266,7 @@ type Cpu struct {
 }
 
 // String implements the Stringer interface.
-func (c Cpu) String() string {
+func (c CPU) String() string {
 	s := `6502 (2A03)
   Program Counter: %x
   Stack Pointer:   %x
@@ -285,14 +285,14 @@ func (c Cpu) String() string {
     Negative          = %t`
 
 	return fmt.Sprintf(s, c.pc, c.sp, c.a, c.x, c.y,
-		c.isflag(FLAG_CARRY), c.isflag(FLAG_ZERO),
-		c.isflag(FLAG_NOINTERRUPT), c.isflag(FLAG_DECIMAL),
-		c.isflag(FLAG_BREAK), c.isflag(FLAG_UNUSED),
-		c.isflag(FLAG_OVERFLOW), c.isflag(FLAG_SIGN))
+		c.isflag(FlagCarry), c.isflag(FlagZero),
+		c.isflag(FlagNoInterrupt), c.isflag(FlagDecimal),
+		c.isflag(FlagBreak), c.isflag(FlagUnused),
+		c.isflag(FlagOverflow), c.isflag(FlagSign))
 }
 
 // Step executes a single cycle of the CPU.
-func (c *Cpu) Step() {
+func (c *CPU) Step() {
 	op := c.memory.Get(c.pc)
 	addr := c.pc + 1
 	mode := modetable[op]
@@ -310,22 +310,22 @@ func (c *Cpu) Step() {
 }
 
 // Returns true if processor status flag is set.
-func (c *Cpu) isflag(flag uint8) bool {
+func (c *CPU) isflag(flag uint8) bool {
 	return c.p&flag != 0
 }
 
 // Set processor status flag.
-func (c *Cpu) flag(flag uint8) {
+func (c *CPU) flag(flag uint8) {
 	c.p |= flag
 }
 
 // Clear processor status flag.
-func (c *Cpu) unflag(flag uint8) {
+func (c *CPU) unflag(flag uint8) {
 	c.p &= ^flag
 }
 
 // Assign value to processor status flag.
-func (c *Cpu) setflag(flag uint8, v bool) {
+func (c *CPU) setflag(flag uint8, v bool) {
 	if v {
 		c.flag(flag)
 	} else {
@@ -333,21 +333,21 @@ func (c *Cpu) setflag(flag uint8, v bool) {
 	}
 }
 
-func (c *Cpu) calcflags(result int16, mask uint8) {
+func (c *CPU) calcflags(result int16, mask uint8) {
 	// TODO(nmcapule): Im not sure about this one though.
-	if mask&FLAG_CARRY != 0 {
-		c.setflag(FLAG_CARRY, result&0xF00 != 0)
+	if mask&FlagCarry != 0 {
+		c.setflag(FlagCarry, result&0xF00 != 0)
 	}
-	if mask&FLAG_ZERO != 0 {
-		c.setflag(FLAG_ZERO, result == 0)
+	if mask&FlagZero != 0 {
+		c.setflag(FlagZero, result == 0)
 	}
 	// TODO(nmcapule): Im not sure about this one though.
-	if mask&FLAG_OVERFLOW != 0 {
-		c.setflag(FLAG_ZERO, result > 0x0FF)
+	if mask&FlagOverflow != 0 {
+		c.setflag(FlagZero, result > 0x0FF)
 	}
 	// Sign bit is just the most significant bit in a byte.
-	if mask&FLAG_SIGN != 0 {
-		c.setflag(FLAG_SIGN, result&0x80 != 0)
+	if mask&FlagSign != 0 {
+		c.setflag(FlagSign, result&0x80 != 0)
 	}
 }
 
@@ -355,7 +355,7 @@ func (c *Cpu) calcflags(result int16, mask uint8) {
 // counter has already moved before this method is called.
 //
 // Returns the address and whether addressing mode caused a page boundary crossing.
-func (c *Cpu) calcaddr(addr uint16, mode addrMode) (uint16, bool) {
+func (c *CPU) calcaddr(addr uint16, mode addrMode) (uint16, bool) {
 	switch mode {
 	case ABSOL: // Absolute
 		return c.memory.Get16(addr), false
@@ -398,36 +398,36 @@ func (c *Cpu) calcaddr(addr uint16, mode addrMode) (uint16, bool) {
 	}
 }
 
-func (c *Cpu) adc(x uint8) int16 {
+func (c *CPU) adc(x uint8) int16 {
 	// TODO(nmcapule)
 
-	c.calcflags(int16(c.a), FLAG_SIGN|FLAG_ZERO|FLAG_CARRY|FLAG_OVERFLOW)
+	c.calcflags(int16(c.a), FlagSign|FlagZero|FlagCarry|FlagOverflow)
 
 	return int16(0)
 }
 
-func (c *Cpu) and(x uint8) int16 {
+func (c *CPU) and(x uint8) int16 {
 	c.a &= x
 
-	c.calcflags(int16(c.a), FLAG_SIGN|FLAG_ZERO)
+	c.calcflags(int16(c.a), FlagSign|FlagZero)
 
 	return int16(c.a)
 }
 
-func (c *Cpu) clc() {
-	c.unflag(FLAG_CARRY)
+func (c *CPU) clc() {
+	c.unflag(FlagCarry)
 }
 
-func (c *Cpu) cld() {
-	c.unflag(FLAG_DECIMAL)
+func (c *CPU) cld() {
+	c.unflag(FlagDecimal)
 }
 
-func (c *Cpu) cli() {
-	c.unflag(FLAG_NOINTERRUPT)
+func (c *CPU) cli() {
+	c.unflag(FlagNoInterrupt)
 }
 
-func (c *Cpu) clv() {
-	c.unflag(FLAG_OVERFLOW)
+func (c *CPU) clv() {
+	c.unflag(FlagOverflow)
 }
 
 // Checks if addr a and b differ pages (page is per 256 bytes).
